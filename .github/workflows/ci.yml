@@ -1,0 +1,61 @@
+name: CI
+
+# https://raw.githubusercontent.com/xuwei-k/scalameta-ast/main/.github/workflows/ci.yml
+
+on:
+  pull_request:
+  push:
+  workflow_dispatch:
+
+# # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+# permissions:
+#   contents: read
+#   pages: write
+#   id-token: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        working-directory: src
+    
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+    
+    steps:
+    - name: 🚚 Checkout
+      uses: actions/checkout@v3
+    
+    - name: ⚒️ Setup Node
+      uses: actions/setup-node@v3
+      with:
+        node-version: "18.15.0"
+    
+#     - name: Fix source files
+#       run: |
+#        npm install
+#        ./node_modules/.bin/prettier --write "./sources/main.js" "./sources/index.html"
+#        git diff --exit-code
+    
+    - name: ⚒️ Setup Java
+      uses: actions/setup-java@v3
+      with:
+        java-version: 17
+        distribution: temurin
+    
+    - uses: coursier/cache-action@v6
+    - run: sbt -v
+           scalafmtSbtCheck
+           scalafmtCheckAll
+           updateClassifiers
+           test
+           copyFilesFull
+    - if: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' && github.repository_owner == 'xuwei-k' }}
+      uses: JamesIves/github-pages-deploy-action@v4.4.1
+      with:
+        branch: gh-pages
+        folder: sources
+        clean: true
