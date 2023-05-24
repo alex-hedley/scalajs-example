@@ -1,0 +1,6 @@
+# macOS
+.DS_Store
+
+# Scala
+src/example/project/
+src/example/target/
