@@ -40,23 +40,30 @@ jobs:
 #        ./node_modules/.bin/prettier --write "./sources/main.js" "./sources/index.html"
 #        git diff --exit-code
     
-    - name: ⚒️ Setup Java
+    - name: ⚙️ Setup Java
       uses: actions/setup-java@v4
       with:
         java-version: 17
         distribution: temurin
 
     # https://github.com/sbt/setup-sbt
-    - uses: sbt/setup-sbt@v1
-    
-    - uses: coursier/cache-action@v6
-    - run: sbt -v
+    - name: ⚙️ Setup SBT
+      uses: sbt/setup-sbt@v1
+
+    - name: Cache
+      uses: coursier/cache-action@v6
+
+    - name: ▶️ Run
+      working-directory: ./src/example
+      run: sbt -v
            scalafmtSbtCheck
            scalafmtCheckAll
            updateClassifiers
            test
            copyFilesFull
-    - if: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' && github.repository_owner == 'xuwei-k' }}
+
+    - name: 🚀 Deploy to GH Pages
+      # if: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' && github.repository_owner == 'xuwei-k' }}
       uses: JamesIves/github-pages-deploy-action@v4.7.3
       with:
         branch: gh-pages
